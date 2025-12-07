@@ -17,8 +17,8 @@ export function validateCreateAd(body: any): CreateAdRequest {
   if (typeof body.price !== 'number') {
     throw new ValidationError('Price must be a number');
   }
-  if (body.price < 0) {
-    throw new ValidationError('Price must be non-negative (>= 0)');
+  if (!(body.price >= 0)) {
+    throw new ValidationError('Price must be a non-negative number');
   }
 
   return {

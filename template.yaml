@@ -47,8 +47,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'create-ad-${Environment}'
-      CodeUri: src/
-      Handler: handlers/createAd.handler
+      CodeUri: .
+      Handler: src/handlers/createAd.handler
       Runtime: nodejs20.x
       Events:
         CreateAdEvent:
@@ -71,14 +71,14 @@ Resources:
         Variables:
           API_KEY: !Ref ApiKey
           # AWS_REGION: !Ref AWS::Region
-    # Metadata:
-    #   BuildMethod: esbuild
-    #   BuildProperties:
-    #     Minify: false
-    #     Target: "es2020"
-    #     Sourcemap: true
-    #     EntryPoints:
-    #       - src/handlers/createAd.ts
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/createAd.ts
   # DynamoDB Table for Ads
   AdsTable:
     Type: AWS::DynamoDB::Table
