@@ -1,0 +1,61 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# AWS SAM
+.aws-sam/
+samconfig.toml
+sam-tests/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+coverage/
+.nyc_output/
+
+# Test
+*.test.js
+*.spec.js
+
+# OS
+Thumbs.db
+.DS_Store

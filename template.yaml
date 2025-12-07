@@ -1,0 +1,150 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Serverless Ads API - Create advertisements with DynamoDB and optional S3 image storage'
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: nodejs20.x
+    Environment:
+      Variables:
+        ADS_TABLE_NAME: !Ref AdsTable
+        ADS_BUCKET_NAME: !Ref AdsImageBucket
+        API_KEY: !Sub '{{resolve:secretsmanager:AdsApiKey:SecretString:api-key}}'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Deployment environment
+  ApiKey:
+     Type: String
+     Description: API Key for authentication
+     Default: dev-api-key-123
+     NoEcho: true
+
+Resources:
+  # API Gateway
+  AdsApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub 'ads-api-${Environment}'
+      StageName: !Ref Environment
+      TracingEnabled: true
+      # MethodSettings:
+      #   - ResourcePath: '/*'
+      #     HttpMethod: '*'
+      #     LoggingLevel: INFO
+      #     DataTraceEnabled: true
+
+  # Lambda Function - Create Ad Handler
+  CreateAdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'create-ad-${Environment}'
+      CodeUri: src/
+      Handler: handlers/createAd.handler
+      Runtime: nodejs20.x
+      Events:
+        CreateAdEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AdsApi
+            Path: /ads
+            Method: POST
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AdsTable
+        # Secrets Manager permissions
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:AdsApiKey*'
+      Environment:
+        Variables:
+          API_KEY: !Ref ApiKey
+          # AWS_REGION: !Ref AWS::Region
+    # Metadata:
+    #   BuildMethod: esbuild
+    #   BuildProperties:
+    #     Minify: false
+    #     Target: "es2020"
+    #     Sourcemap: true
+    #     EntryPoints:
+    #       - src/handlers/createAd.ts
+  # DynamoDB Table for Ads
+  AdsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'AdsTable-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: ads-api
+
+  # S3 Bucket for Ad Images
+  AdsImageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ads-images-${AWS::AccountId}-${AWS::Region}-${Environment}'
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: ads-api
+
+  # Lambda Log Group
+  CreateAdFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/create-ad-${Environment}'
+      RetentionInDays: 7
+
+Outputs:
+  AdsApiEndpoint:
+    Description: API Gateway endpoint for creating ads
+    Value: !Sub 'https://${AdsApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/ads'
+    Export:
+      Name: !Sub 'AdsApiEndpoint-${Environment}'
+
+  AdsTableName:
+    Description: DynamoDB table for storing ads
+    Value: !Ref AdsTable
+    Export:
+      Name: !Sub 'AdsTableName-${Environment}'
+
+  AdsImageBucketName:
+    Description: S3 bucket for ad images
+    Value: !Ref AdsImageBucket
+    Export:
+      Name: !Sub 'AdsImageBucketName-${Environment}'
+
+  CreateAdFunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt CreateAdFunction.Arn
+    Export:
+      Name: !Sub 'CreateAdFunctionArn-${Environment}'
