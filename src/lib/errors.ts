@@ -1,0 +1,27 @@
+export class HttpError extends Error {
+  constructor(public statusCode: number, message: string) {
+    super(message);
+    this.name = 'HttpError';
+  }
+}
+
+export class ValidationError extends HttpError {
+  constructor(message: string) {
+    super(400, message);
+    this.name = 'ValidationError';
+  }
+}
+
+export class UnauthorizedError extends HttpError {
+  constructor(message: string = 'Unauthorized') {
+    super(401, message);
+    this.name = 'UnauthorizedError';
+  }
+}
+
+export class InternalServerError extends HttpError {
+  constructor(message: string = 'Internal Server Error') {
+    super(500, message);
+    this.name = 'InternalServerError';
+  }
+}
