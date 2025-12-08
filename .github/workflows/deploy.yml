@@ -69,6 +69,7 @@ jobs:
           sam deploy \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
+            --resolve-s3 \
             --stack-name ads-api-prod \
             --s3-prefix ads-api-prod \
             --capabilities CAPABILITY_IAM \
