@@ -74,15 +74,3 @@ export async function createAd(request: CreateAdRequest): Promise<AdResponse> {
 
   return response;
 }
-
-export async function getAd(id: string): Promise<AdItem | null> {
-  const { GetCommand } = await import('@aws-sdk/lib-dynamodb');
-
-  const params = {
-    TableName: process.env.ADS_TABLE_NAME || 'AdsTable',
-    Key: { id },
-  };
-
-  const result = await docClient.send(new GetCommand(params));
-  return (result.Item as AdItem) || null;
-}

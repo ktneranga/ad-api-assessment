@@ -60,6 +60,8 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref AdsTable
+        - S3CrudPolicy:
+            BucketName: !Ref AdsImageBucket
         # Secrets Manager permissions
         - Version: '2012-10-17'
           Statement:
