@@ -36,11 +36,6 @@ Resources:
       Name: !Sub 'ads-api-${Environment}'
       StageName: !Ref Environment
       TracingEnabled: true
-      # MethodSettings:
-      #   - ResourcePath: '/*'
-      #     HttpMethod: '*'
-      #     LoggingLevel: INFO
-      #     DataTraceEnabled: true
 
   # Lambda Function - Create Ad Handler
   CreateAdFunction:

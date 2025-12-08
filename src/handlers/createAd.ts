@@ -7,14 +7,14 @@ import { CreateAdRequest } from '../types/ad';
 import { HttpError, UnauthorizedError } from '../lib/errors';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  // Log request ID
+  // Get request ID for logging
   const requestId = event.requestContext?.requestId || 'unknown';
   const logger = new Logger(requestId);
 
   try {
     logger.log('Received POST /ads request');
 
-    // Authenticate using API key
+    // Authentication
     const apiKey = event.headers['x-api-key'] || event.headers['X-Api-Key'];
 
     if (!validateApiKey(apiKey)) {
@@ -34,7 +34,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       throw error;
     }
 
-    // Create the ad service
+    // Save ad to DynamoDB
     const result = await createAd(requestBody);
     logger.log('Ad created', { id: result.id });
 

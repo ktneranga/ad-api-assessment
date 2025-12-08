@@ -9,6 +9,7 @@ export async function createAd(request: CreateAdRequest): Promise<AdResponse> {
   const id = randomUUID();
   const now = new Date().toISOString();
 
+  // Prepare the item to be saved in DynamoDB
   const item: AdItem = {
     id,
     title: request.title,
@@ -17,7 +18,7 @@ export async function createAd(request: CreateAdRequest): Promise<AdResponse> {
     updatedAt: now,
   };
 
-  // If an image is provided (base64), upload to S3 and attach URL
+  // If an image is provided (base64), upload to S3
   if (request.imageBase64) {
     try {
       let base64Data = request.imageBase64;
@@ -30,11 +31,13 @@ export async function createAd(request: CreateAdRequest): Promise<AdResponse> {
         base64Data = dataUriMatch[2];
       }
 
+      // Convert base64 to Buffer
       const buffer = Buffer.from(base64Data, 'base64');
 
       const bucket = process.env.ADS_BUCKET_NAME || 'ads-images';
       const key = `${id}`;
 
+      // Upload to S3
       await s3Client.send(
         new PutObjectCommand({
           Bucket: bucket,
@@ -54,13 +57,16 @@ export async function createAd(request: CreateAdRequest): Promise<AdResponse> {
     }
   }
 
+  // Prepare DynamoDB put parameters
   const params = {
     TableName: process.env.ADS_TABLE_NAME || 'AdsTable',
     Item: item,
   };
 
+  // Save to DynamoDB
   await docClient.send(new PutCommand(params));
 
+  // Prepare response
   const response: AdResponse = {
     id: item.id,
     title: item.title,

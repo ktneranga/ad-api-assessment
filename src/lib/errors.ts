@@ -5,6 +5,7 @@ export class HttpError extends Error {
   }
 }
 
+// Validation error
 export class ValidationError extends HttpError {
   constructor(message: string) {
     super(400, message);
@@ -12,6 +13,7 @@ export class ValidationError extends HttpError {
   }
 }
 
+// Unauthorized error
 export class UnauthorizedError extends HttpError {
   constructor(message: string = 'Unauthorized') {
     super(401, message);
@@ -19,6 +21,7 @@ export class UnauthorizedError extends HttpError {
   }
 }
 
+// Internal server error
 export class InternalServerError extends HttpError {
   constructor(message: string = 'Internal Server Error') {
     super(500, message);
