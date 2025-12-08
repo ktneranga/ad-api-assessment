@@ -21,8 +21,16 @@ export function validateCreateAd(body: any): CreateAdRequest {
     throw new ValidationError('Price must be a non-negative number');
   }
 
+  // Validate optional imageBase64
+  if (body.imageBase64 !== undefined && body.imageBase64 !== null) {
+    if (typeof body.imageBase64 !== 'string' || body.imageBase64.trim() === '') {
+      throw new ValidationError('imageBase64 must be a non-empty base64 string when provided');
+    }
+  }
+
   return {
     title: body.title,
     price: body.price,
+    imageBase64: body.imageBase64,
   };
 }

@@ -34,7 +34,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       throw error;
     }
 
-    // Step 3: Create ad
+    // Create the ad
     const result = await createAd(requestBody);
     logger.log('Ad created', { id: result.id });
 
