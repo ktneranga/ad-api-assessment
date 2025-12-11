@@ -348,5 +348,48 @@ describe('CreateAd Handler', () => {
       const responseBody = JSON.parse(result.body);
       expect(responseBody).toHaveProperty('imageUrl');
     });
+
+    it('should handle very large prices', async () => {
+      // Arrange: Test with large price value (e.g., luxury item)
+      const requestBody = {
+        title: 'Luxury Yacht',
+        price: 999999999.99,
+      };
+      const event = createMockEvent(requestBody);
+
+      // Act
+      const result = await handler(event);
+
+      // Assert
+      expect(result.statusCode).toBe(201);
+      const responseBody = JSON.parse(result.body);
+      expect(responseBody.price).toBe(999999999.99);
+      expect(responseBody.title).toBe('Luxury Yacht');
+    });
+
+    it('should generate unique IDs for multiple ads', async () => {
+      // Arrange: Create two ads with same data
+      const requestBody = {
+        title: 'Duplicate Test',
+        price: 50,
+      };
+      const event1 = createMockEvent(requestBody);
+      const event2 = createMockEvent(requestBody);
+
+      // Act: Create two ads
+      const result1 = await handler(event1);
+      const result2 = await handler(event2);
+
+      // Assert: Both should succeed with different IDs
+      expect(result1.statusCode).toBe(201);
+      expect(result2.statusCode).toBe(201);
+      
+      const ad1 = JSON.parse(result1.body);
+      const ad2 = JSON.parse(result2.body);
+      
+      expect(ad1.id).toBeDefined();
+      expect(ad2.id).toBeDefined();
+      expect(ad1.id).not.toBe(ad2.id); // IDs should be unique
+    });
   });
 });
