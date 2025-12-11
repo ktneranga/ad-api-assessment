@@ -286,6 +286,20 @@ describe('CreateAd Handler', () => {
       expect(responseBody.message).toBe('imageBase64 must be a non-empty base64 string when provided');
     });
 
+    it('should return 400 when imageBase64 is not a string', async () => {
+      // Arrange: Test invalid data type for imageBase64
+      const requestBody = { title: 'Test Ad', price: 100, imageBase64: 12345 };
+      const event = createMockEvent(requestBody);
+
+      // Act
+      const result = await handler(event);
+
+      // Assert
+      expect(result.statusCode).toBe(400);
+      const responseBody = JSON.parse(result.body);
+      expect(responseBody.message).toBe('imageBase64 must be a non-empty base64 string when provided');
+    });
+
     it('should return 400 when body is invalid JSON', async () => {
       // Arrange: Invalid JSON string
       const event = createMockEvent({});
